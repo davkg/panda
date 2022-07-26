@@ -24,15 +24,6 @@ MSG_BREMSE_1 = 0x1A0     # RX from ABS, for ego speed
 MSG_LDW_1 = 0x5BE        # TX by OP, Lane line recognition and text alerts
 
 
-def volkswagen_pq_checksum(msg, addr, len_msg):
-  msg_bytes = bytes(msg.data)
-  msg_bytes = msg_bytes[1:len_msg]
-
-  checksum = 0
-  for i in msg_bytes:
-    checksum ^= i
-  return checksum
-
 class TestVolkswagenPqSafety(common.PandaSafetyTest):
   cruise_engaged = False
   cnt_lenkhilfe_3 = 0
@@ -75,20 +66,14 @@ class TestVolkswagenPqSafety(common.PandaSafetyTest):
   # Driver steering input torque
   def _lenkhilfe_3_msg(self, torque):
     values = {"LH3_LM": abs(torque), "LH3_LMSign": torque < 0,
-              "LH3_Zaehler": self.cnt_lenkhilfe_3 % 16}
-    # TODO: move checksum handling to CPP library with the rest
-    to_calc = self.packer.make_can_msg_panda("Lenkhilfe_3", 0, values)
-    values.update({"LH3_Checksumme": volkswagen_pq_checksum(to_calc[0], MSG_LENKHILFE_3, 6)})
+              "COUNTER": self.cnt_lenkhilfe_3 % 16}
     self.__class__.cnt_lenkhilfe_3 += 1
     return self.packer.make_can_msg_panda("Lenkhilfe_3", 0, values)
 
   # openpilot steering output torque
   def _hca_1_msg(self, torque):
     values = {"LM_Offset": abs(torque), "LM_OffSign": torque < 0,
-              "HCA_Zaehler": self.cnt_hca_1 % 16}
-    # TODO: move checksum handling to CPP library with the rest
-    to_calc = self.packer.make_can_msg_panda("HCA_1", 0, values)
-    values.update({"HCA_Checksumme": volkswagen_pq_checksum(to_calc[0], MSG_HCA_1, 5)})
+              "COUNTER": self.cnt_hca_1 % 16}
     self.__class__.cnt_hca_1 += 1
     return self.packer.make_can_msg_panda("HCA_1", 0, values)
 
@@ -107,10 +92,7 @@ class TestVolkswagenPqSafety(common.PandaSafetyTest):
   # Cruise control buttons (GRA_Neu)
   def _button_msg(self, _set=False, resume=False, cancel=False):
     values = {"GRA_Neu_Setzen": _set, "GRA_Recall": resume,
-              "GRA_Abbrechen": cancel, "GRA_Neu_Zaehler": self.cnt_gra_neu % 16}
-    # TODO: move checksum handling to CPP library with the rest
-    to_calc = self.packer.make_can_msg_panda("GRA_Neu", 2, values)
-    values.update({"GRA_Checksum": volkswagen_pq_checksum(to_calc[0], MSG_GRA_NEU, 4)})
+              "GRA_Abbrechen": cancel, "COUNTER": self.cnt_gra_neu % 16}
     self.__class__.cnt_gra_neu += 1
     return self.packer.make_can_msg_panda("GRA_Neu", 2, values)
 
