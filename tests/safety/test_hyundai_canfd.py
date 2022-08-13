@@ -6,7 +6,7 @@ import panda.tests.safety.common as common
 from panda.tests.safety.common import CANPackerPanda
 from panda.tests.safety.test_hyundai import HyundaiButtonBase
 
-class TestHyundaiHDA2(HyundaiButtonBase, common.PandaSafetyTest, common.DriverTorqueSteeringSafetyTest):
+class TestHyundaiCanfd(HyundaiButtonBase, common.PandaSafetyTest, common.DriverTorqueSteeringSafetyTest):
 
   TX_MSGS = [[0x50, 0], [0x1CF, 1], [0x2A4, 0]]
   STANDSTILL_THRESHOLD = 30  # ~1kph
@@ -28,7 +28,7 @@ class TestHyundaiHDA2(HyundaiButtonBase, common.PandaSafetyTest, common.DriverTo
   def setUp(self):
     self.packer = CANPackerPanda("kia_ev6")
     self.safety = libpandasafety_py.libpandasafety
-    self.safety.set_safety_hooks(Panda.SAFETY_HYUNDAI_HDA2, 0)
+    self.safety.set_safety_hooks(Panda.SAFETY_HYUNDAI_CANFD, 0)
     self.safety.init_tests()
 
   def _torque_driver_msg(self, torque):
@@ -55,7 +55,7 @@ class TestHyundaiHDA2(HyundaiButtonBase, common.PandaSafetyTest, common.DriverTo
     values = {"CRUISE_ACTIVE": enable}
     return self.packer.make_can_msg_panda("SCC1", 1, values)
 
-  def _button_msg(self, buttons, main_button=0):
+  def _button_msg(self, buttons, main_button=0, bus=1):
     values = {
       "CRUISE_BUTTONS": buttons,
       "ADAPTIVE_CRUISE_MAIN_BTN": main_button,
