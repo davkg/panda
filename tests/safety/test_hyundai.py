@@ -114,7 +114,7 @@ class TestHyundaiSafety(HyundaiButtonBase, common.PandaSafetyTest, common.Driver
 
 
 class TestHyundaiSafetyCameraSCC(TestHyundaiSafety):
-  BUTTONS_BUS = 2  # tx on 2, rx on 0
+  BUTTONS_TX_BUS = 2  # tx on 2, rx on 0
   SCC_BUS = 2  # rx on 2
 
   def setUp(self):
@@ -179,8 +179,7 @@ class TestHyundaiLongitudinalSafety(HyundaiLongitudinalBase, TestHyundaiSafety):
 
   def _fca11_msg(self, idx=0, vsm_aeb_req=False, fca_aeb_req=False, aeb_decel=0):
     values = {
-      "CR_FCA_Alive": ((-((idx % 0xF) + 2) % 4) << 2) + 1,
-      "Supplemental_Counter": idx % 0xF,
+      "CR_FCA_Alive": idx % 0xF,
       "FCA_Status": 2,
       "CR_VSM_DecCmd": aeb_decel,
       "CF_VSM_DecCmdAct": int(vsm_aeb_req),
