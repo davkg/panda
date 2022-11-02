@@ -194,9 +194,7 @@ class TestVolkswagenMqbLongSafety(TestVolkswagenMqbSafety):
         # primary accel request used by ECU
         self.assertEqual(send, self._tx(self._acc_06_msg(accel)), (controls_allowed, accel))
         # additional accel request used by ABS/ESP
-        self.assertEqual(send, self._tx(self._acc_07_msg(accel)), (controls_allowed, accel))
-        # ensure the optional secondary accel field remains disabled for now
-        self.assertFalse(self._tx(self._acc_07_msg(accel, secondary_accel=accel)), (controls_allowed, accel))
+        self.assertEqual(send, self._tx(self._acc_07_msg(accel, secondary_accel=accel)), (controls_allowed, accel))
 
 
 if __name__ == "__main__":
