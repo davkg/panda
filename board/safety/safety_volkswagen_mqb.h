@@ -218,7 +218,6 @@ static int volkswagen_mqb_tx_hook(CANPacket_t *to_send, bool longitudinal_allowe
   if ((addr == MSG_ACC_06) || (addr == MSG_ACC_07)) {
     bool violation = false;
     int desired_accel = 0;
-    int secondary_accel = 0;
 
     if (addr == MSG_ACC_06) {
       // Signal: ACC_06.ACC_Sollbeschleunigung_02 (acceleration in m/s2, scale 0.005, offset -7.22)
@@ -226,8 +225,6 @@ static int volkswagen_mqb_tx_hook(CANPacket_t *to_send, bool longitudinal_allowe
     } else {
       // Signal: ACC_07.ACC_Sollbeschleunigung_02 (acceleration in m/s2, scale 0.005, offset -7.22)
       desired_accel = (((GET_BYTE(to_send, 7) << 3) | ((GET_BYTE(to_send, 6) & 0xE0U) >> 5)) * 5U) - 7220U;
-      // Signal: ACC_07.ACC_Folgebeschl (acceleration in m/s2, scale 0.03, offset -4.6)
-      secondary_accel = (GET_BYTE(to_send, 4) * 30U) - 4600U;
     }
 
     // VW send one increment above the max range when inactive
@@ -240,7 +237,6 @@ static int volkswagen_mqb_tx_hook(CANPacket_t *to_send, bool longitudinal_allowe
     }
 
     violation |= max_limit_check(desired_accel, VOLKSWAGEN_MQB_MAX_ACCEL, VOLKSWAGEN_MQB_MIN_ACCEL);
-    violation |= max_limit_check(secondary_accel, VOLKSWAGEN_MQB_MAX_ACCEL, VOLKSWAGEN_MQB_MIN_ACCEL);
 
     if (violation) {
       tx = 0;
