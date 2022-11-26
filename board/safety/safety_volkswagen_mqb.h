@@ -47,7 +47,7 @@ AddrCheckStruct volkswagen_mqb_addr_checks[] = {
 addr_checks volkswagen_mqb_rx_checks = {volkswagen_mqb_addr_checks, VOLKSWAGEN_MQB_ADDR_CHECKS_LEN};
 
 uint8_t volkswagen_crc8_lut_8h2f[256]; // Static lookup table for CRC8 poly 0x2F, aka 8H2F/AUTOSAR
-bool volkswagen_mqb_brake_switch = false;
+bool volkswagen_mqb_brake_pedal_switch = false;
 bool volkswagen_mqb_brake_pressure_detected = false;
 
 static uint32_t volkswagen_mqb_get_checksum(CANPacket_t *to_push) {
@@ -99,7 +99,7 @@ static const addr_checks* volkswagen_mqb_init(uint16_t param) {
 
   volkswagen_set_button_prev = false;
   volkswagen_resume_button_prev = false;
-  volkswagen_mqb_brake_switch = false;
+  volkswagen_mqb_brake_pedal_switch = false;
   volkswagen_mqb_brake_pressure_detected = false;
 
 #ifdef ALLOW_DEBUG
@@ -184,7 +184,7 @@ static int volkswagen_mqb_rx_hook(CANPacket_t *to_push) {
 
     // Signal: Motor_14.MO_Fahrer_bremst (ECU detected brake pedal switch F63)
     if (addr == MSG_MOTOR_14) {
-      volkswagen_mqb_brake_switch = (GET_BYTE(to_push, 3) & 0x10U) >> 4;
+      volkswagen_mqb_brake_pedal_switch = (GET_BYTE(to_push, 3) & 0x10U) >> 4;
     }
 
     // Signal: ESP_05.ESP_Fahrer_bremst (ESP detected driver brake pressure above platform specified threshold)
@@ -192,7 +192,7 @@ static int volkswagen_mqb_rx_hook(CANPacket_t *to_push) {
       volkswagen_mqb_brake_pressure_detected = (GET_BYTE(to_push, 3) & 0x4U) >> 2;
     }
 
-    brake_pressed = volkswagen_mqb_brake_switch || volkswagen_mqb_brake_pressure_detected;
+    brake_pressed = volkswagen_mqb_brake_pedal_switch || volkswagen_mqb_brake_pressure_detected;
 
     generic_rx_checks((addr == MSG_HCA_01));
   }

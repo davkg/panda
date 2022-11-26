@@ -105,7 +105,6 @@ class TestVolkswagenMqbSafety(common.PandaSafetyTest, common.DriverTorqueSteerin
 
   # Verify brake_pressed is true if either the switch or pressure threshold signals are true
   def test_redundant_brake_signals(self):
-    self.assertFalse(self.safety.get_brake_pressed_prev())
     test_combinations = [(True, True, True), (True, True, False), (True, False, True), (False, False, False)]
     for brake_pressed, motor_14_signal, esp_05_signal in test_combinations:
       self._rx(self._motor_14_msg(False))
@@ -114,7 +113,7 @@ class TestVolkswagenMqbSafety(common.PandaSafetyTest, common.DriverTorqueSteerin
       self._rx(self._motor_14_msg(motor_14_signal))
       self._rx(self._esp_05_msg(esp_05_signal))
       self.assertEqual(brake_pressed, self.safety.get_brake_pressed_prev(),
-                       f"expected brake_pressed {brake_pressed} with motor_14 {motor_14_signal} and esp_05 {esp_05_signal}")
+                       f"expected {brake_pressed=} with {motor_14_signal=} and {esp_05_signal=}")
 
   def test_torque_measurements(self):
     # TODO: make this test work with all cars
