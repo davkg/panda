@@ -14,6 +14,7 @@
 #include "safety/safety_subaru_legacy.h"
 #include "safety/safety_mazda.h"
 #include "safety/safety_nissan.h"
+#include "safety/safety_volkswagen_mlb.h"
 #include "safety/safety_volkswagen_mqb.h"
 #include "safety/safety_volkswagen_pq.h"
 #include "safety/safety_elm327.h"
@@ -47,7 +48,7 @@
 #define SAFETY_SUBARU_LEGACY 22U
 #define SAFETY_HYUNDAI_LEGACY 23U
 #define SAFETY_HYUNDAI_COMMUNITY 24U
-#define SAFETY_STELLANTIS 25U
+#define SAFETY_VOLKSWAGEN_MLB 25U
 #define SAFETY_FAW 26U
 #define SAFETY_BODY 27U
 #define SAFETY_HYUNDAI_CANFD 28U
