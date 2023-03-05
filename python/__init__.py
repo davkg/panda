@@ -217,7 +217,6 @@ class Panda:
 
   FLAG_CHRYSLER_RAM_DT = 1
   FLAG_CHRYSLER_RAM_HD = 2
-  FLAG_CHRYSLER_LOWER_RATE = 4
 
   FLAG_SUBARU_GEN2 = 1
 
@@ -892,6 +891,11 @@ class Panda:
     dat = self._handle.controlRead(Panda.REQUEST_IN, 0xa0, 0, 0, 8)
     a = struct.unpack("HBBBBBB", dat)
     return datetime.datetime(a[0], a[1], a[2], a[4], a[5], a[6])
+
+  # ****************** Timer *****************
+  def get_microsecond_timer(self):
+    dat = self._handle.controlRead(Panda.REQUEST_IN, 0xa8, 0, 0, 4)
+    return struct.unpack("I", dat)[0]
 
   # ******************* IR *******************
   def set_ir_power(self, percentage):
