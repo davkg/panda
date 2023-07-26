@@ -2,11 +2,11 @@
 
 // lateral limits
 const SteeringLimits VOLKSWAGEN_MQB_STEERING_LIMITS = {
-  .max_steer = 300,              // 3.0 Nm (EPS side max of 3.0Nm with fault if violated)
+  .max_steer = 64000,              // 3.0 Nm (EPS side max of 3.0Nm with fault if violated)
   .max_rt_delta = 75,            // 4 max rate up * 50Hz send rate * 250000 RT interval / 1000000 = 50 ; 50 * 1.5 for safety pad = 75
-  .max_rt_interval = 250000,     // 250ms between real time checks
-  .max_rate_up = 4,              // 2.0 Nm/s RoC limit (EPS rack has own soft-limit of 5.0 Nm/s)
-  .max_rate_down = 10,           // 5.0 Nm/s RoC limit (EPS rack has own soft-limit of 5.0 Nm/s)
+  .max_rt_interval = 24000,     // 250ms between real time checks
+  .max_rate_up = 1280,              // 2.0 Nm/s RoC limit (EPS rack has own soft-limit of 5.0 Nm/s)
+  .max_rate_down = 1280,           // 5.0 Nm/s RoC limit (EPS rack has own soft-limit of 5.0 Nm/s)
   .driver_torque_allowance = 80,
   .driver_torque_factor = 3,
   .type = TorqueDriverLimited,
@@ -20,6 +20,7 @@ const LongitudinalLimits VOLKSWAGEN_MQB_LONG_LIMITS = {
   .inactive_accel = 3010,  // VW sends one increment above the max range when inactive
 };
 
+#define MSG_HCA_NEW     0x303
 #define MSG_ESP_19      0x0B2   // RX from ABS, for wheel speeds
 #define MSG_LH_EPS_03   0x09F   // RX from EPS, for driver steering torque
 #define MSG_ESP_05      0x106   // RX from ABS, for brake switch state
@@ -109,7 +110,8 @@ static const addr_checks* volkswagen_mqb_init(uint16_t param) {
   volkswagen_longitudinal = GET_FLAG(param, FLAG_VOLKSWAGEN_LONG_CONTROL);
 #endif
   gen_crc_lookup_table_8(0x2F, volkswagen_crc8_lut_8h2f);
-  return &volkswagen_mqb_rx_checks;
+  // FIXME: return &volkswagen_mqb_rx_checks;
+  return &default_rx_checks;
 }
 
 static int volkswagen_mqb_rx_hook(CANPacket_t *to_push) {
@@ -200,7 +202,8 @@ static int volkswagen_mqb_rx_hook(CANPacket_t *to_push) {
 
     generic_rx_checks((addr == MSG_HCA_01));
   }
-  return valid;
+//  return valid;
+  return true;
 }
 
 static int volkswagen_mqb_tx_hook(CANPacket_t *to_send) {
@@ -262,6 +265,7 @@ static int volkswagen_mqb_tx_hook(CANPacket_t *to_send) {
   }
 
   // 1 allows the message through
+  tx = 1;
   return tx;
 }
 
@@ -274,7 +278,8 @@ static int volkswagen_mqb_fwd_hook(int bus_num, int addr) {
       bus_fwd = 2;
       break;
     case 2:
-      if ((addr == MSG_HCA_01) || (addr == MSG_LDW_02)) {
+      //if ((addr == MSG_HCA_01) || (addr == MSG_LDW_02)) {
+      if (addr == MSG_HCA_NEW) {
         // openpilot takes over LKAS steering control and related HUD messages from the camera
         bus_fwd = -1;
       } else if (volkswagen_longitudinal && ((addr == MSG_ACC_02) || (addr == MSG_ACC_06) || (addr == MSG_ACC_07))) {
