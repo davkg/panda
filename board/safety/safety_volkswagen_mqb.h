@@ -151,7 +151,7 @@ static int volkswagen_mqb_rx_hook(CANPacket_t *to_push) {
       // When using stock ACC, enter controls on rising edge of stock ACC engage, exit on disengage
       // Always exit controls on main switch off
       // Signal: TSK_06.TSK_Status
-      int acc_status = (GET_BYTE(to_push, 10) & 0x7U);
+      int acc_status = (GET_BYTE(to_push, 11) & 0x7U);
       bool cruise_engaged = (acc_status == 3) || (acc_status == 4) || (acc_status == 5);
       acc_main_on = cruise_engaged || (acc_status == 2);
 
