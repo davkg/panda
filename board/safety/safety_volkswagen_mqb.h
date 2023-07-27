@@ -21,6 +21,7 @@ const LongitudinalLimits VOLKSWAGEN_MQB_LONG_LIMITS = {
 };
 
 #define MSG_HCA_NEW     0x303
+#define MSG_MOTOR_NEW_1 0x10B
 #define MSG_ESP_19      0x0B2   // RX from ABS, for wheel speeds
 #define MSG_LH_EPS_03   0x09F   // RX from EPS, for driver steering torque
 #define MSG_ESP_05      0x106   // RX from ABS, for brake switch state
@@ -146,11 +147,11 @@ static int volkswagen_mqb_rx_hook(CANPacket_t *to_push) {
       update_sample(&torque_driver, torque_driver_new);
     }
 
-    if (addr == MSG_TSK_06) {
+    if (addr == MSG_MOTOR_NEW_1) {
       // When using stock ACC, enter controls on rising edge of stock ACC engage, exit on disengage
       // Always exit controls on main switch off
       // Signal: TSK_06.TSK_Status
-      int acc_status = (GET_BYTE(to_push, 3) & 0x7U);
+      int acc_status = (GET_BYTE(to_push, 10) & 0x7U);
       bool cruise_engaged = (acc_status == 3) || (acc_status == 4) || (acc_status == 5);
       acc_main_on = cruise_engaged || (acc_status == 2);
 
