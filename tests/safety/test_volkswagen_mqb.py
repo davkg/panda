@@ -26,10 +26,10 @@ class TestVolkswagenMqbSafety(common.PandaCarSafetyTest, common.DriverTorqueStee
   STANDSTILL_THRESHOLD = 0
   RELAY_MALFUNCTION_ADDRS = {0: (MSG_HCA_01,)}
 
-  MAX_RATE_UP = 4
+  MAX_RATE_UP = 10
   MAX_RATE_DOWN = 10
   MAX_TORQUE = 300
-  MAX_RT_DELTA = 75
+  MAX_RT_DELTA = 188
   RT_INTERVAL = 250000
 
   DRIVER_TORQUE_ALLOWANCE = 80
