@@ -84,7 +84,7 @@ def build_project(project_name, project, extra_flags):
     '..',
     panda_root,
     f"{panda_root}/board/",
-    f"{panda_root}/board/stm32fx/inc",
+    f"{panda_root}/board/stm32f4/inc",
     f"{panda_root}/board/stm32h7/inc",
   ]
 
@@ -101,7 +101,8 @@ def build_project(project_name, project, extra_flags):
     ASCOM="$AS $ASFLAGS -o $TARGET -c $SOURCES",
     BUILDERS={
       'Objcopy': Builder(generator=objcopy, suffix='.bin', src_suffix='.elf')
-    }
+    },
+    tools=["default", "compilation_db"],
   )
 
   startup = env.Object(f"obj/startup_{project_name}", project["STARTUP_FILE"])
@@ -129,8 +130,8 @@ def build_project(project_name, project, extra_flags):
 
 base_project_f4 = {
   "MAIN": "main.c",
-  "STARTUP_FILE": File("./board/stm32fx/startup_stm32f413xx.s"),
-  "LINKER_SCRIPT": File("./board/stm32fx/stm32f4_flash.ld"),
+  "STARTUP_FILE": File("./board/stm32f4/startup_stm32f413xx.s"),
+  "LINKER_SCRIPT": File("./board/stm32f4/stm32f4_flash.ld"),
   "APP_START_ADDRESS": "0x8004000",
   "PROJECT_FLAGS": [
     "-mcpu=cortex-m4",
@@ -178,9 +179,6 @@ with open("board/obj/cert.h", "w") as f:
 
 # panda fw
 SConscript('board/SConscript')
-
-# pedal fw
-SConscript('board/pedal/SConscript')
 
 # panda jungle fw
 SConscript('board/jungle/SConscript')

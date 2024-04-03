@@ -7,7 +7,7 @@ USB_OTG_GlobalTypeDef *USBx = USB_OTG_HS;
 #define USBx_DFIFO(i)   *(__IO uint32_t *)((uint32_t)USBx + USB_OTG_FIFO_BASE + ((i) * USB_OTG_FIFO_SIZE))
 #define USBx_PCGCCTL    *(__IO uint32_t *)((uint32_t)USBx + USB_OTG_PCGCCTL_BASE)
 
-#define USBD_FS_TRDT_VALUE        6U
+#define USBD_FS_TRDT_VALUE        6UL
 #define USB_OTG_SPEED_FULL        3U
 #define DCFG_FRAME_INTERVAL_80    0U
 
@@ -32,7 +32,7 @@ void usb_init(void) {
   USBx->GUSBCFG |= USB_OTG_GUSBCFG_FDMOD;
   delay(250000); // Wait for about 25ms (explicitly stated in H7 ref manual)
   // Wait for AHB master IDLE state.
-  while ((USBx->GRSTCTL & USB_OTG_GRSTCTL_AHBIDL) == 0);
+  while ((USBx->GRSTCTL & USB_OTG_GRSTCTL_AHBIDL) == 0U);
   // Core Soft Reset
   USBx->GRSTCTL |= USB_OTG_GRSTCTL_CSRST;
   while ((USBx->GRSTCTL & USB_OTG_GRSTCTL_CSRST) == USB_OTG_GRSTCTL_CSRST);
