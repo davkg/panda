@@ -13,6 +13,7 @@
 #define MSG_LS_01       0x10B   // TX by OP, ACC control buttons for cancel/resume
 #define MSG_MOTOR_03    0x105   // RX from ECU, for driver throttle input and brake switch status
 #define MSG_TSK_02      0x10C   // RX from ECU, for ACC status from drivetrain coordinator
+#define MSG_ACC_05      0x10D   // RX from radar, for ACC status
 
 // MQB only messages
 #define MSG_ACC_06      0x122   // TX by OP, ACC control instructions to the drivetrain coordinator
