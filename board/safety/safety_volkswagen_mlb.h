@@ -19,7 +19,7 @@ RxCheck volkswagen_mlb_rx_checks[] = {
   {.msg = {{MSG_ESP_03, 0, 8, .check_checksum = false, .max_counter = 15U, .frequency = 50U}, { 0 }, { 0 }}},
   {.msg = {{MSG_LH_EPS_03, 0, 8, .check_checksum = false, .max_counter = 15U, .frequency = 100U}, { 0 }, { 0 }}},
   {.msg = {{MSG_ESP_05, 0, 8, .check_checksum = false, .max_counter = 15U, .frequency = 50U}, { 0 }, { 0 }}},
-  {.msg = {{MSG_ACC_05, 0, 8, .check_checksum = false, .max_counter = 15U, .frequency = 50U}, { 0 }, { 0 }}},
+  {.msg = {{MSG_ACC_05, 2, 8, .check_checksum = false, .max_counter = 15U, .frequency = 50U}, { 0 }, { 0 }}},
   {.msg = {{MSG_MOTOR_03, 0, 8, .check_checksum = false, .max_counter = 15U, .frequency = 100U}, { 0 }, { 0 }}},
 };
 
@@ -35,9 +35,9 @@ static safety_config volkswagen_mlb_init(uint16_t param) {
 }
 
 static void volkswagen_mlb_rx_hook(const CANPacket_t *to_push) {
-  if (GET_BUS(to_push) == 0U) {
-    int addr = GET_ADDR(to_push);
+  int addr = GET_ADDR(to_push);
 
+  if (GET_BUS(to_push) == 0U) {
     // Check all wheel speeds for any movement
     // Signals: ESP_03.ESP_[VL|VR|HL|HR]_Radgeschw
     if (addr == MSG_ESP_03) {
@@ -52,21 +52,6 @@ static void volkswagen_mlb_rx_hook(const CANPacket_t *to_push) {
     // Update driver input torque
     if (addr == MSG_LH_EPS_03) {
       update_sample(&torque_driver, volkswagen_mlb_mqb_driver_input_torque(to_push));
-    }
-
-    if (addr == MSG_ACC_05) {
-      // When using stock ACC, enter controls on rising edge of stock ACC engage, exit on disengage
-      // Always exit controls on main switch off
-      // Signal: ACC_05.ACC_Status_ACC
-      int acc_status = (GET_BYTE(to_push, 7) & 0xEU) >> 1;
-      bool cruise_engaged = (acc_status == 3) || (acc_status == 4) || (acc_status == 5);
-      acc_main_on = cruise_engaged || (acc_status == 2);
-
-      pcm_cruise_check(cruise_engaged);
-
-      if (!acc_main_on) {
-        controls_allowed = false;
-      }
     }
 
     if (addr == MSG_LS_01) {
@@ -91,6 +76,23 @@ static void volkswagen_mlb_rx_hook(const CANPacket_t *to_push) {
     brake_pressed = volkswagen_brake_pedal_switch || volkswagen_brake_pressure_detected;
 
     generic_rx_checks((addr == MSG_HCA_01));
+  }
+
+  if (GET_BUS(to_push) == 2U) {
+    if (addr == MSG_ACC_05) {
+      // When using stock ACC, enter controls on rising edge of stock ACC engage, exit on disengage
+      // Always exit controls on main switch off
+      // Signal: ACC_05.ACC_Status_ACC
+      int acc_status = (GET_BYTE(to_push, 7) & 0xEU) >> 1;
+      bool cruise_engaged = (acc_status == 3) || (acc_status == 4) || (acc_status == 5);
+      acc_main_on = cruise_engaged || (acc_status == 2);
+
+      pcm_cruise_check(cruise_engaged);
+
+      if (!acc_main_on) {
+        controls_allowed = false;
+      }
+    }
   }
 }
 

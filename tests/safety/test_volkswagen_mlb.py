@@ -67,7 +67,7 @@ class TestVolkswagenMlbSafety(common.PandaCarSafetyTest, common.DriverTorqueStee
   # ACC engagement status
   def _tsk_status_msg(self, enable, main_switch=True):
     values = {"ACC_Status_ACC": 1 if not main_switch else 3 if enable else 2}
-    return self.packer.make_can_msg_panda("ACC_05", 0, values)
+    return self.packer.make_can_msg_panda("ACC_05", 2, values)
 
   def _pcm_status_msg(self, enable):
     return self._tsk_status_msg(enable)
