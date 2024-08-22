@@ -14,8 +14,8 @@ struct fan_state_t fan_state;
 const float FAN_I = 0.001f;
 
 const uint8_t FAN_TICK_FREQ = 8U;
-const uint8_t FAN_STALL_THRESHOLD_MIN = 3U;
-const uint8_t FAN_STALL_THRESHOLD_MAX = 8U;
+const uint8_t FAN_STALL_THRESHOLD_MIN = 2U;
+const uint8_t FAN_STALL_THRESHOLD_MAX = 2U;
 
 
 void fan_set_power(uint8_t percentage) {
