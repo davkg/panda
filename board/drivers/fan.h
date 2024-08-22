@@ -53,8 +53,11 @@ void fan_tick(void) {
           fan_state.stall_threshold = CLAMP(fan_state.stall_threshold + 2U, FAN_STALL_THRESHOLD_MIN, FAN_STALL_THRESHOLD_MAX);
           fan_state.total_stall_count += 1U;
 
+          // Set fan power to 100 when a stall is detected
+          fan_state.power = 100U;
+
           // datasheet gives this range as the minimum startup duty
-          fan_state.error_integral = CLAMP(fan_state.error_integral, 20.0f, 45.0f);
+          // fan_state.error_integral = CLAMP(fan_state.error_integral, 20.0f, 45.0f);
         }
       } else {
         fan_state.stall_counter = 0U;
@@ -86,7 +89,9 @@ void fan_tick(void) {
       float error = fan_state.target_rpm - fan_rpm_fast;
       fan_state.error_integral += FAN_I * error;
     }
-    fan_state.power = CLAMP(fan_state.error_integral, 0U, 100U);
+    if (!fan_stalled) {
+      fan_state.power = CLAMP(fan_state.error_integral, 0U, 100U);
+    }
 
     // Set PWM and enable line
     pwm_set(TIM3, 3, fan_state.power);
