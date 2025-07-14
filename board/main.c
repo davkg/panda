@@ -158,6 +158,7 @@ static void tick_handler(void) {
     usb_tick();
     harness_tick();
     simple_watchdog_kick();
+    sound_tick();
 
     // re-init everything that uses harness status
     if (harness.status != prev_harness_status) {
@@ -215,7 +216,7 @@ static void tick_handler(void) {
       }
 
       if (controls_allowed || heartbeat_engaged) {
-        controls_allowed_countdown = 30U;
+        controls_allowed_countdown = 5U;
       } else if (controls_allowed_countdown > 0U) {
         controls_allowed_countdown -= 1U;
       } else {
@@ -240,7 +241,7 @@ static void tick_handler(void) {
           print(" seconds. Safety is set to SILENT mode.\n");
 
           if (controls_allowed_countdown > 0U) {
-            siren_countdown = 5U;
+            siren_countdown = 3U;
             controls_allowed_countdown = 0U;
           }
 
