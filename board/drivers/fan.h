@@ -42,7 +42,7 @@ void fan_tick(void) {
     }
 
     uint8_t power = fan_state.power;
-    if ((fan_state.power > 0U) && (fan_state.rpm == 0U)) {
+    if ((fan_state.power > 0U) && (fan_rpm_fast == 0 || fan_state.rpm < 120U)) {
       // Noctua fan needs 100% power to unstall
       power = 100U;
     }
