@@ -3,7 +3,7 @@
 struct fan_state_t fan_state;
 
 static const uint8_t FAN_TICK_FREQ = 8U;
-static const uint8_t FAN_STALL_THRESHOLD_MIN = 3U;
+static const uint8_t FAN_STALL_THRESHOLD_MIN = 1U;
 
 
 void fan_set_power(uint8_t percentage) {
@@ -20,7 +20,7 @@ void fan_init(void) {
 // Call this at FAN_TICK_FREQ
 void fan_tick(void) {
   const float FAN_I = 6.5f;
-  const uint8_t FAN_STALL_THRESHOLD_MAX = 8U;
+  const uint8_t FAN_STALL_THRESHOLD_MAX = 3U;
 
   if (current_board->fan_max_rpm > 0U) {
     // Measure fan RPM
@@ -44,8 +44,8 @@ void fan_tick(void) {
           fan_state.stall_threshold = CLAMP(fan_state.stall_threshold + 2U, FAN_STALL_THRESHOLD_MIN, FAN_STALL_THRESHOLD_MAX);
           fan_state.total_stall_count += 1U;
 
-          // datasheet gives this range as the minimum startup duty
-          fan_state.error_integral = CLAMP(fan_state.error_integral, 20.0f, 45.0f);
+          // Noctua fan needs 100% power to unstall
+          fan_state.error_integral = 100.0f;
         }
       } else {
         fan_state.stall_counter = 0U;
