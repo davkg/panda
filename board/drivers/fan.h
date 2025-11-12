@@ -50,8 +50,14 @@ void fan_tick(void) {
     fan_state.error_integral = CLAMP(fan_state.error_integral, 0U, current_board->fan_max_pwm);
     fan_state.power = fan_state.error_integral;
 
-    // Set PWM and enable line
-    pwm_set(TIM3, 3, fan_state.power);
+    uint8_t power = fan_state.power;
+    if ((fan_state.power > 0U) && (fan_rpm_fast == 0 || fan_state.rpm < 120U)) {
+      // Noctua fan needs 100% power to unstall
+      power = 100U;
+    }
+
+    pwm_set(TIM3, 3, power);
+
     current_board->set_fan_enabled((fan_state.target_rpm > 0U) || (fan_state.cooldown_counter > 0U));
   }
 }
