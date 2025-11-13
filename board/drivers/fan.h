@@ -51,8 +51,9 @@ void fan_tick(void) {
     fan_state.power = fan_state.error_integral;
 
     uint8_t power = fan_state.power;
-    if ((fan_state.power > 0U) && (fan_rpm_fast == 0 || fan_state.rpm < 120U)) {
-      // Noctua fan needs 100% power to unstall
+    // Noctua fan needs 100% power to unstall
+    if (((fan_state.target_rpm > 0U) || (fan_state.cooldown_counter > 0U)) &&
+        (fan_rpm_fast == 0 || fan_state.rpm < 120U)) {
       power = 100U;
     }
 
