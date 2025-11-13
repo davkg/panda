@@ -24,6 +24,22 @@ void fan_tick(void) {
     fan_state.tach_counter = 0U;
     fan_state.rpm = (fan_rpm_fast + (3U * fan_state.rpm)) / 4U;
 
+    bool fan_stalled = false;
+    if (fan_state.target_rpm > 0U) {
+      if (fan_rpm_fast == 0U) {
+        fan_state.stall_counter = MIN(fan_state.stall_counter + 1U, 254U);
+      } else {
+        fan_state.stall_counter = 0U;
+      }
+      // Simple 1 second stall threshold
+      if (fan_state.stall_counter > FAN_TICK_FREQ) {
+        fan_stalled = true;
+        fan_state.stall_counter = 0U; // Reset counter to try again
+      }
+    } else {
+      fan_state.stall_counter = 0U;
+    }
+
     #ifdef DEBUG_FAN
       puth(fan_state.target_rpm);
       print(" "); puth(fan_rpm_fast);
@@ -41,7 +57,10 @@ void fan_tick(void) {
     }
 
     // Update controller
-    if (fan_state.target_rpm == 0U) {
+    if (fan_stalled) {
+      // Noctua fan needs 100% power to unstall
+      fan_state.error_integral = current_board->fan_max_pwm;
+    } else if (fan_state.target_rpm == 0U) {
       fan_state.error_integral = 0.0f;
     } else {
       float error = (fan_state.target_rpm - fan_rpm_fast) / ((float) current_board->fan_max_rpm);
@@ -50,15 +69,11 @@ void fan_tick(void) {
     fan_state.error_integral = CLAMP(fan_state.error_integral, 0U, current_board->fan_max_pwm);
     fan_state.power = fan_state.error_integral;
 
-    bool fan_enabled = (fan_state.target_rpm > 0U) || (fan_state.cooldown_counter > 0U);
-    uint8_t power = fan_state.power;
+    // Determine final enable state
+    bool fan_should_be_on = (fan_state.target_rpm > 0U) || (fan_state.cooldown_counter > 0U);
 
-    // Noctua fan needs 100% power to unstall
-    if (fan_enabled && (fan_rpm_fast == 0 || fan_state.rpm < 120U)) {
-      power = 100U;
-    }
-    pwm_set(TIM3, 3, power);
-
-    current_board->set_fan_enabled(fan_enabled);
+    pwm_set(TIM3, 3, fan_state.power);
+    // fan_stalled cycles the enable line
+    current_board->set_fan_enabled(fan_should_be_on && !fan_stalled);
   }
 }
