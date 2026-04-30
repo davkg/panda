@@ -41,8 +41,23 @@ void fan_tick(void) {
       }
     }
 
+    // Anti-stall: if fan is commanded on but RPM is stuck at 0 for 1 second,
+    // blip to 100% for one tick to overcome startup stall (Noctua NF-A4x10 workaround).
+    uint8_t effective_power = fan_state.power;
+    if (fan_state.power > 0U) {
+      if (fan_state.rpm == 0U) {
+        fan_state.stall_counter++;
+        if (fan_state.stall_counter >= FAN_TICK_FREQ) {
+          fan_state.stall_counter = 0U;
+          effective_power = 100U;
+        }
+      } else {
+        fan_state.stall_counter = 0U;
+      }
+    }
+
     // Set PWM and enable line
-    pwm_set(TIM3, 3, fan_state.power);
+    pwm_set(TIM3, 3, effective_power);
     current_board->set_fan_enabled((fan_state.power > 0U) || (fan_state.cooldown_counter > 0U));
   }
 }
