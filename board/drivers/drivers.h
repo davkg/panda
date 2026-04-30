@@ -94,6 +94,7 @@ struct fan_state_t {
   uint8_t power;
   float error_integral;
   uint8_t cooldown_counter;
+  uint8_t stall_counter;
 };
 extern struct fan_state_t fan_state;
 
