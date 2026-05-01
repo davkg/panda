@@ -42,17 +42,17 @@ void fan_tick(void) {
     }
 
     // Anti-stall: if fan is commanded on but no raw tach pulses for 1 second,
-    // blip to 100% power and cycle the enable line to reset the fan controller
-    // (Noctua NF-A4x10 on Comma 3X workaround).
+    // cycle the enable line once to reset the fan controller, then hold at 100%
+    // until the fan is confirmed spinning (Noctua NF-A4x10 on Comma 3X workaround).
     bool fan_stalled = false;
     uint8_t effective_power = fan_state.power;
     if (fan_state.power > 0U) {
       if (fan_rpm_fast == 0U) {
         fan_state.stall_counter = MIN(fan_state.stall_counter + 1U, 254U);
         if (fan_state.stall_counter > FAN_TICK_FREQ) {
-          fan_stalled = true;
-          fan_state.stall_counter = 0U;
           effective_power = 100U;
+          // Cycle the enable line only on the first trigger tick to reset the controller.
+          fan_stalled = (fan_state.stall_counter == (FAN_TICK_FREQ + 1U));
         }
       } else {
         fan_state.stall_counter = 0U;
