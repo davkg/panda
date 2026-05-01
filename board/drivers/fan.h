@@ -41,11 +41,12 @@ void fan_tick(void) {
       }
     }
 
-    // Anti-stall: if fan is commanded on but RPM is stuck at 0 for 1 second,
+    // Anti-stall: if fan is commanded on but RPM is stuck below FAN_MIN_RPM for 1 second,
     // set power to 100% to overcome startup stall (Noctua NF-A4x10 workaround).
+    static const uint16_t FAN_MIN_RPM = 200U;
     uint8_t effective_power = fan_state.power;
     if (fan_state.power > 0U) {
-      if (fan_state.rpm == 0U) {
+      if (fan_state.rpm < FAN_MIN_RPM) {
         fan_state.stall_counter++;
         if (fan_state.stall_counter >= FAN_TICK_FREQ) {
           effective_power = 100U;
