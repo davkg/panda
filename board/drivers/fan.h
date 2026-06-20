@@ -41,8 +41,28 @@ void fan_tick(void) {
       }
     }
 
-    // Set PWM and enable line
-    pwm_set(TIM3, 3, fan_state.power);
-    current_board->set_fan_enabled((fan_state.power > 0U) || (fan_state.cooldown_counter > 0U));
+    // Anti-stall: if fan is commanded on but no raw tach pulses for 1 second,
+    // cycle the enable line once to reset the fan controller, then hold at 100%
+    // until the fan is confirmed spinning (Noctua NF-A4x10 on Comma 3X workaround).
+    bool fan_stalled = false;
+    uint8_t effective_power = fan_state.power;
+    if (fan_state.power > 0U) {
+      if (fan_rpm_fast == 0U) {
+        fan_state.stall_counter = MIN(fan_state.stall_counter + 1U, 254U);
+        if (fan_state.stall_counter > FAN_TICK_FREQ) {
+          effective_power = 100U;
+          // Cycle the enable line only on the first trigger tick to reset the controller.
+          fan_stalled = (fan_state.stall_counter == (FAN_TICK_FREQ + 1U));
+        }
+      } else {
+        fan_state.stall_counter = 0U;
+      }
+    } else {
+      fan_state.stall_counter = 0U;
+    }
+
+    // Set PWM and enable line. Cycling enable off on stall resets the fan controller.
+    pwm_set(TIM3, 3, effective_power);
+    current_board->set_fan_enabled(((fan_state.power > 0U) || (fan_state.cooldown_counter > 0U)) && !fan_stalled);
   }
 }
